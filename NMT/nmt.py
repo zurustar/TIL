@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 
 #
+# 以下がインストールされている必要あり
+#
+# python3 wget lv mecab
+#
 # 事前に以下を実行しておく必要あり
 #
 # wget http://www2.nict.go.jp/astrec-att/member/mutiyama/manual/PostgreSQL/je.tgz
@@ -14,7 +18,7 @@ import os
 
 
 def load():
-	mecab = '/usr/bin/mecab'
+	mecab = 'mecab'
 	ja_utf8_txt = './ja.utf8.txt'
 	en_utf8_txt = './en.utf8.txt'
 
