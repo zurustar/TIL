@@ -21,7 +21,6 @@ def load():
 	mecab = 'mecab'
 	ja_utf8_txt = './ja.utf8.txt'
 	en_utf8_txt = './en.utf8.txt'
-
 	ja_fp = open(ja_utf8_txt, 'w')
 	en_fp = open(en_utf8_txt, 'w')
 	for line in open('./para.utf8.txt').read().split('\n'):
@@ -41,16 +40,28 @@ def load():
 	ja_fp.close()
 	en_fp.close()
 	ja = subprocess.run([mecab, "-Owakati", "-b65535", ja_utf8_txt], stdout=subprocess.PIPE)
-	ja_fp = open(ja_utf8_txt, 'w')
-	ja_fp.write(ja.stdout.decode())
-	ja_fp.close()
 	en = subprocess.run([mecab, "-Owakati", "-b65535", en_utf8_txt], stdout=subprocess.PIPE)
-	en_fp = open(en_utf8_txt, 'w')
-	en_fp.write(en.stdout.decode())
-	en_fp.close()
+	return en.stdout.decode(), ja.stdout.decode()
+
+
+def generate_vocabulary(src):
+	vocabulary = {}
+	for sentence in src.split('\n'):
+		for word in sentence.split(' '):
+			for character in word:
+				if character not in vocabulary:
+					vocabulary[character] = len(vocabulary)
+	return vocabulary
+
+def conv2ary(en, ja):
+	en_vocabulary = generate_vocabulary(en)
+	ja_vocabulary = generate_vocabulary(ja)
+	print(en_vocabulary)
+	print(ja_vocabulary)
 
 def main():
-	load()
+	en, ja = load()
+	conv2ary(en, ja)
 
 if __name__ == '__main__':
 	main()
