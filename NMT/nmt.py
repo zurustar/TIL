@@ -15,6 +15,7 @@
 import unicodedata
 import subprocess
 import os
+import numpy as np
 
 
 def load():
@@ -45,19 +46,31 @@ def load():
 
 
 def generate_vocabulary(src):
+	special_characters = ['<PAD>', '<UNK>', '<GO>', '<EOS>']
 	vocabulary = {}
+	for i in range(len(special_characters)):
+		vocabulary[special_characters[i]] = i
+	array = []
 	for sentence in src.split('\n'):
+		sentence_array = []
 		for word in sentence.split(' '):
+			word_array = []
 			for character in word:
 				if character not in vocabulary:
 					vocabulary[character] = len(vocabulary)
-	return vocabulary
+				word_array.append(vocabulary[character])
+			sentence_array.append(word_array)
+		array.append(sentence_array)
+	return vocabulary, array
+
+
 
 def conv2ary(en, ja):
-	en_vocabulary = generate_vocabulary(en)
-	ja_vocabulary = generate_vocabulary(ja)
-	print(en_vocabulary)
-	print(ja_vocabulary)
+	en_vocabulary, en_array = generate_vocabulary(en)
+	ja_vocabulary, ja_array = generate_vocabulary(ja)
+	print(en_array)
+
+		
 
 def main():
 	en, ja = load()
