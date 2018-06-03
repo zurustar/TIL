@@ -1,30 +1,47 @@
 #!/usr/bin/env python
 
-#
-# 以下がインストールされている必要あり
-#
-# python3 wget lv mecab
-#
-# 事前に以下を実行しておく必要あり
-#
-# wget http://www2.nict.go.jp/astrec-att/member/mutiyama/manual/PostgreSQL/je.tgz
-# tar zxvf ./je.tgz
-# lv -Ou8 ./je/para.txt > ./para.utf8.txt
-#
+'''
+
+ 以下がインストールされている必要あり
+
+ python3 wget lv mecab
+
+ 事前に以下を実行しておく必要あり
+
+ wget http://www2.nict.go.jp/astrec-att/member/mutiyama/manual/PostgreSQL/je.tgz
+ tar zxvf ./je.tgz
+ lv -Ou8 ./je/para.txt > ./para.utf8.txt
+
+'''
 
 import unicodedata
 import subprocess
-import os
 import numpy as np
-
+import os
 import keras
 
-#
-# NICTが公開している翻訳データを解析し、英語とそれに対応する日本語を抽出する
-#  同じフォルダに事前にUTF-8化した翻訳データがpara.utf8.txtという名前でおいておく必要あり
-#
+
+def run_mecab(filename):
+
+    '''
+
+    外部コマンド mecab を使ってfilenameで与えられたファイル内の文字列を分割（分かち書き）
+
+    '''
+
+    return subprocess.run(["mecab", "-Owakati", "-b65535", filename],
+                            stdout=subprocess.PIPE)
+
+
 def load_for_nict():
-	mecab = 'mecab'
+
+	'''
+
+	NICTが公開している翻訳データを解析し、英語とそれに対応する日本語を抽出する
+	同じフォルダに事前にUTF-8化した翻訳データがpara.utf8.txtという名前でおいておく必要あり
+
+	'''
+
 	ja_utf8_txt = './ja.utf8.txt'
 	en_utf8_txt = './en.utf8.txt'
 	ja_fp = open(ja_utf8_txt, 'w')
@@ -45,16 +62,20 @@ def load_for_nict():
 				ja_fp.write(ja + "\n")
 	ja_fp.close()
 	en_fp.close()
-	ja = subprocess.run([mecab, "-Owakati", "-b65535", ja_utf8_txt], stdout=subprocess.PIPE)
-	en = subprocess.run([mecab, "-Owakati", "-b65535", en_utf8_txt], stdout=subprocess.PIPE)
+	ja = run_mecab(ja_utf8_txt)
+	en = run_mecab(en_utf8_txt)
 	return en.stdout.decode(), ja.stdout.decode()
 
 
-#
-# 文字列を受け取り、出現する文字に一意の番号を付与したうえで、
-# 受け取った文字列を番号の並びに変換する
-#
 def generate_vocabulary(src):
+
+	'''
+
+	 文字列を受け取り、出現する文字に一意の番号を付与したうえで、
+	  受け取った文字列を番号の並びに変換する
+
+	'''
+
 	special_characters = ['<PAD>', '<UNK>', '<GO>', '<EOS>']
 	vocabulary = {}
 	for i in range(len(special_characters)):
@@ -77,7 +98,7 @@ def generate_vocabulary(src):
 def main():
 
 	# 学習対象の翻訳データを抜き出して、
-    # 学習用の形式に変換
+	# 学習用の形式に変換
 	en, ja = load_for_nict()
 	en_vocab, en_array = generate_vocabulary(en)
 	ja_vocab, ja_array = generate_vocabulary(ja)
@@ -90,7 +111,7 @@ def main():
 	# Embeddingの結果、何次元のテンソルにしたいか？
 	output_dim = 64
 
-    # ？？
+	# ？？
 	input_length = 10
 
 	model = keras.models.Sequential()
@@ -105,4 +126,3 @@ def main():
 
 if __name__ == '__main__':
 	main()
-
