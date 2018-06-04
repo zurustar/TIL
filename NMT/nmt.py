@@ -19,7 +19,9 @@ import subprocess
 import numpy as np
 import os
 import keras
-
+from keras.layers.embeddings import Embedding
+from keras.layers import Dense
+from keras.layers import LSTM
 
 def run_mecab(filename):
 
@@ -115,12 +117,14 @@ def main():
 	input_length = 10
 
 	model = keras.models.Sequential()
-	print("add embedding layer")
-	model.add(keras.layers.embeddings.Embedding(max_word_index, output_dim, input_length=input_length))
-	print("add encoder")
-	model.add(keras.layers.LSTM(64))
-	print("add decoder")
-	model.add(keras.layers.LSTM(64))
+	#model.add(Embedding(max_word_index, output_dim, input_length=input_length))
+	model.add(Embedding(max_word_index, output_dim))
+	model.add(LSTM(output_dim))
+	model.add(Dense(32))
+	#model.add(LSTM(output_dim))
+
+	model.summary()
+
 	model.compile(optimizer='rmsprop', loss='categorical_crossentropy')
 
 
