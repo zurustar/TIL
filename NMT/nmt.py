@@ -119,9 +119,9 @@ def main():
 	model = keras.models.Sequential()
 	#model.add(Embedding(max_word_index, output_dim, input_length=input_length))
 	model.add(Embedding(max_word_index, output_dim))
+	model.add(LSTM(output_dim, return_sequences=True))
 	model.add(LSTM(output_dim))
 	model.add(Dense(32))
-	#model.add(LSTM(output_dim))
 
 	model.summary()
 
