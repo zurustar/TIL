@@ -77,7 +77,7 @@ def generate_vocabulary(src):
 	  受け取った文字列を番号の並びに変換する
 
 	'''
-
+    # PADding, UNKnown, GO, End Of Sentence
 	special_characters = ['<PAD>', '<UNK>', '<GO>', '<EOS>']
 	vocabulary = {}
 	for i in range(len(special_characters)):
@@ -93,7 +93,7 @@ def generate_vocabulary(src):
 				word_array.append(vocabulary[character])
 			sentence_array.append(word_array)
 		array.append(sentence_array)
-	return vocabulary, array
+	return vocabulary, np.array(array)
 
 
 
@@ -105,10 +105,6 @@ def main():
 	en_vocab, en_array = generate_vocabulary(en)
 	ja_vocab, ja_array = generate_vocabulary(ja)
 
-	# 入力の次元数を表すので、ボキャブラリ数に該当する
-	max_word_index = len(en_vocab)
-	if max_word_index < len(ja_vocab):
-		max_word_index =len(ja_vocab)
 
 	# Embeddingの結果、何次元のテンソルにしたいか？
 	output_dim = 64
@@ -118,14 +114,13 @@ def main():
 
 	model = keras.models.Sequential()
 	#model.add(Embedding(max_word_index, output_dim, input_length=input_length))
-	model.add(Embedding(max_word_index, output_dim))
+	model.add(Embedding(len(en_vocab), output_dim))
 	model.add(LSTM(output_dim, return_sequences=True))
 	model.add(LSTM(output_dim))
-	model.add(Dense(32))
-
+	model.add(Dense(len(ja_vocab)))
 	model.summary()
-
 	model.compile(optimizer='rmsprop', loss='categorical_crossentropy')
+	history = model.fit(en_array, ja_array, epochs=10, batch_size=128, validation_split=0.2)
 
 
 if __name__ == '__main__':
