@@ -82,15 +82,22 @@ def generate_vocabulary(src):
 	vocabulary = {}
 	for i in range(len(special_characters)):
 		vocabulary[special_characters[i]] = i
+	# 単語の最大長の取得
+	max_word_length = 0
+	for sentence in src.split('\n'):
+		for word in sentence.split(' '):
+			if max_word_length < len(word):
+				max_word_length = len(word)
 	array = []
 	for sentence in src.split('\n'):
 		sentence_array = []
 		for word in sentence.split(' '):
-			word_array = []
-			for character in word:
+			word_array = np.zeros(max_word_length + 1)
+			for i in range(len(word)):
+				character = word[i]
 				if character not in vocabulary:
 					vocabulary[character] = len(vocabulary)
-				word_array.append(vocabulary[character])
+				word_array[i] = vocabulary[character]
 			sentence_array.append(word_array)
 		array.append(sentence_array)
 	return vocabulary, np.array(array)
@@ -105,6 +112,9 @@ def main():
 	en_vocab, en_array = generate_vocabulary(en)
 	ja_vocab, ja_array = generate_vocabulary(ja)
 
+	print('en_array.shape=', en_array.shape)
+	print('ja_array.shape=', ja_array.shape)
+
 
 	# Embeddingの結果、何次元のテンソルにしたいか？
 	output_dim = 64
@@ -117,9 +127,10 @@ def main():
 	model.add(Embedding(len(en_vocab), output_dim))
 	model.add(LSTM(output_dim, return_sequences=True))
 	model.add(LSTM(output_dim))
-	model.add(Dense(len(ja_vocab)))
+	#model.add(Dense(len(ja_vocab)))
+	model.add(Dense(1))
 	model.summary()
-	model.compile(optimizer='rmsprop', loss='categorical_crossentropy')
+	model.compile(optimizer='rmsprop', loss='sparse_categorical_crossentropy')
 	history = model.fit(en_array, ja_array, epochs=10, batch_size=128, validation_split=0.2)
 
 
