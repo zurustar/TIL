@@ -41,9 +41,10 @@ def run_mecab(filename):
 #
 def load_for_nict(max_lines=None):
 	lines = open('./para.utf8.txt').read().split('\n')
-	random.shuffle(lines)
+	# メモリが少ないとハングするのでmax_linesが指定されていたら絞る
 	if max_lines != None:
 		if len(lines) > max_lines:
+			random.shuffle(lines)
 			lines = lines[:max_lines]
 	ja_utf8_txt = './ja.utf8.txt'
 	en_utf8_txt = './en.utf8.txt'
@@ -54,6 +55,7 @@ def load_for_nict(max_lines=None):
 		if len(sentences) == 3:
 			ja = sentences[1]
 			en = sentences[2]
+			# たまに英語側に日本語が混ざっている異常データがあるので抹消
 			flag = True
 			for c in en:
 				for k in ["CJK UNIFIED", "HIRAGANA", "KATAKANA"]:
@@ -78,7 +80,7 @@ def load_for_nict(max_lines=None):
 def preprocess(src):
 	#
 	# (1) 箱の準備
-	#     PADding, UNKnown, GO, End Of Sentence
+	#	 PADding, UNKnown, GO, End Of Sentence
 	#
 	special_characters = ['<PAD>', '<UNK>', '<GO>', '<EOS>']
 	vocabulary = {}
@@ -133,30 +135,38 @@ def embedding_sample():
 #
 def main():
 
-	# 学習対象の翻訳データを抜き出して、
-	# 学習用の形式に変換
+	print("--- load ---")
 	en, ja = load_for_nict(100)
+	print('len(en) =', len(en), ' len(ja) =', len(ja))
+	print()
+
+	print("--- preprocess EN ---")
 	en_vocab, en_ary = preprocess(en)
+	print('len(en_ary) =', len(en_ary))
+	print('len(en_ary[0]) =', len(en_ary[0]))
+	print('len(en_ary[0][0]) =', len(en_ary[0][0]))
+	print()
+
+	print("--- preprocess JA ---")
 	ja_vocab, ja_ary = preprocess(ja)
+	print('len(ja_ary) =', len(ja_ary))
+	print('len(ja_ary[0]) =', len(ja_ary[0]))
+	print('len(ja_ary[0][0]) =', len(ja_ary[0][0]))
+	print()
 
-	print('en_ary.shape=', en_ary.shape)
-	print('ja_ary.shape=', ja_ary.shape)
-
-	embedding_sample()
-
-
-	# Embeddingの結果、何次元のテンソルにしたいか？
-#	output_dim = 64
-
+	print("--- create model ---")
 	model = keras.models.Sequential()
 	model.add(Embedding(len(en_vocab), 64, input_length=len(en_ary[0])))
 #	model.add(LSTM(output_dim, return_sequences=True))
 #	model.add(LSTM(output_dim))
 #	#model.add(Dense(len(ja_vocab)))
-#	model.add(Dense(1))
-#	model.summary()
-#	model.compile(optimizer='rmsprop', loss='sparse_categorical_crossentropy')
-#	history = model.fit(en_array, ja_array, epochs=10, batch_size=128, validation_split=0.2)
+	model.add(Dense(1))
+	model.summary()
+	model.compile(optimizer='rmsprop', loss='sparse_categorical_crossentropy')
+	print()
+
+	print("--- train ---")
+	history = model.fit(en_ary, ja_ary, epochs=10, batch_size=128, validation_split=0.2)
 
 
 if __name__ == '__main__':
