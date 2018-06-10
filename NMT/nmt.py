@@ -87,7 +87,7 @@ def preprocess(src):
 	for i in range(len(special_characters)):
 		vocabulary[special_characters[i]] = i
 	#
-	# (2) 文書と単語の最大長の取得
+	# (2) 文書の最大長の取得
 	#
 	max_sentence_length = 0
 	max_word_length = 0
@@ -95,26 +95,30 @@ def preprocess(src):
 		words = sentence.split(' ')
 		if max_sentence_length < len(words):
 			max_sentence_length = len(words)
+			print(" 文章長を更新しました(", max_sentence_length, ")：",words)
 		for word in words:
 			if max_word_length < len(word):
 				max_word_length = len(word)
-	print("文書最大長：", max_sentence_length)
-	print("単語最大長：", max_word_length)
+				print(" 単語長を更新しました(", max_word_length, ")：", word)
+	print("最長文書は", max_sentence_length, "単語あった")
+	print("最長単語は", max_word_length, "文字あった")
 	#
 	# (3) 数値配列化
 	#
 	ary = []
 	for sentence in src.split('\n'):
-		sentence_ary = []
-		for word in sentence.split(' '):
-			word_ary = np.zeros(max_sentence_length + 1)
+		sentences_ary = []
+		words = sentence.split(' ')
+		for word in words:
+			words_ary = np.zeros(max_word_length + 1)
 			for i in range(len(word)):
 				character = word[i]
+				# いま調べている文字が辞書になかったら追加
 				if character not in vocabulary:
 					vocabulary[character] = len(vocabulary)
-				word_ary[i] = vocabulary[character]
-			sentence_ary.append(word_ary)
-		ary.append(sentence_ary)
+				words_ary[i] = vocabulary[character]
+			sentences_ary.append(words_ary)
+		ary.append(sentences_ary)
 	return vocabulary, np.array(ary)
 
 def embedding_sample():
@@ -145,6 +149,7 @@ def main():
 	print('len(en_ary) =', len(en_ary))
 	print('len(en_ary[0]) =', len(en_ary[0]))
 	print('len(en_ary[0][0]) =', len(en_ary[0][0]))
+	print('en_ary[0][0] =[', en_ary[0][0], ']')
 	print()
 
 	print("--- preprocess JA ---")
@@ -157,8 +162,8 @@ def main():
 	print("--- create model ---")
 	model = keras.models.Sequential()
 	model.add(Embedding(len(en_vocab), 64, input_length=len(en_ary[0])))
-#	model.add(LSTM(output_dim, return_sequences=True))
-#	model.add(LSTM(output_dim))
+	model.add(LSTM(512, return_sequences=True))
+	model.add(LSTM(512))
 #	#model.add(Dense(len(ja_vocab)))
 	model.add(Dense(1))
 	model.summary()
