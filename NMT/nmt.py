@@ -22,6 +22,7 @@ import random
 import keras
 from keras.models import Sequential
 from keras.layers.embeddings import Embedding
+from keras.layers import Input
 from keras.layers import Dense
 from keras.layers import LSTM
 
@@ -157,21 +158,23 @@ def main():
 	print('len(ja_ary) =', len(ja_ary))
 	print('len(ja_ary[0]) =', len(ja_ary[0]))
 	print('len(ja_ary[0][0]) =', len(ja_ary[0][0]))
+	print('ja_ary[0][0] =', ja_ary[0][0])
 	print()
 
 	print("--- create model ---")
 	model = keras.models.Sequential()
-	model.add(Embedding(len(en_vocab), 64, input_length=len(en_ary[0])))
+	model.add(Input())
+	model.add(Embedding(len(en_vocab), 64))
 	model.add(LSTM(512, return_sequences=True))
 	model.add(LSTM(512))
-#	#model.add(Dense(len(ja_vocab)))
-	model.add(Dense(1))
+	model.add(Dense(len(ja_vocab)))
 	model.summary()
 	model.compile(optimizer='rmsprop', loss='sparse_categorical_crossentropy')
 	print()
 
 	print("--- train ---")
-	history = model.fit(en_ary, ja_ary, epochs=10, batch_size=128, validation_split=0.2)
+	print("en_ary.shape =", en_ary.shape)
+	history = model.fit(en_ary, ja_ary, epochs=10, batch_size=32, validation_split=0.2, verbose=2)
 
 
 if __name__ == '__main__':
