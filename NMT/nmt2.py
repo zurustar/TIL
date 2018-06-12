@@ -48,7 +48,6 @@ def to_train(texts):
 	tokenizer = Tokenizer()
 	tokenizer.fit_on_texts(texts)
 	seqs = tokenizer.texts_to_sequences(texts)
-	return np.array(seqs)
 	maxlen = 0
 	for seq in seqs:
 		if maxlen < len(seq):
@@ -58,12 +57,16 @@ def to_train(texts):
 	return train
 
 def main():
+	# 読み込み
 	en_texts, ja_texts = load()
+	# 入力データの整形
 	tokenizer = Tokenizer()
 	tokenizer.fit_on_texts(en_texts)
 	x_train = tokenizer.texts_to_sequences(en_texts)
 	x_train = np.array(x_train)
+	# 出力データの整形
 	y_train = to_train(ja_texts)
+	# モデル作成
 	model = Sequential()
 	model.add(Embedding(2, 64))
 	model.add(LSTM(512, return_sequences=True))
@@ -71,6 +74,7 @@ def main():
 	model.add(Dense(2655))
 	model.summary()
 	model.compile(optimizer='rmsprop', loss='sparse_categorical_crossentropy')
+	# 学習
 	history = model.fit(x_train, y_train)
 
 if __name__ == '__main__':
