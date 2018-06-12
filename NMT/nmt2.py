@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import numpy as np
 import pickle
 from janome.tokenizer import Tokenizer as janome_tokenizer
 from keras.preprocessing.text import Tokenizer
@@ -47,6 +48,7 @@ def to_train(texts):
 	tokenizer = Tokenizer()
 	tokenizer.fit_on_texts(texts)
 	seqs = tokenizer.texts_to_sequences(texts)
+	return np.array(seqs)
 	maxlen = 0
 	for seq in seqs:
 		if maxlen < len(seq):
@@ -57,7 +59,10 @@ def to_train(texts):
 
 def main():
 	en_texts, ja_texts = load()
-	x_train = to_train(en_texts)
+	tokenizer = Tokenizer()
+	tokenizer.fit_on_texts(en_texts)
+	x_train = tokenizer.texts_to_sequences(en_texts)
+	x_train = np.array(x_train)
 	y_train = to_train(ja_texts)
 	model = Sequential()
 	model.add(Embedding(2, 64))
