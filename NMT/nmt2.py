@@ -15,6 +15,9 @@ from keras.layers import Dense
 MAX_SEQUENCE_LENGTH = 1000
 
 def _load(filename):
+	# 各行が' ||| 'で区切られた翻訳元の英語と翻訳後の日本語の
+	# 対になっているので、分割して英語のリストと日本語のリストにする。
+	# そのあとの処理の都合で、日本語には文節？ごとに半角スペースを挿入
 	t = janome_tokenizer()
 	ja_texts, en_texts = [], []
 	lines = open(filename).read().split('\n')
@@ -31,6 +34,8 @@ def _load(filename):
 	return [en_texts, ja_texts]
 
 def load():
+	# pickleファイルがあったらそこから読み込む。
+	# なかったら元のテキストファイルを読み込んでpickleファイルに保存しておく。
 	filename = './para.utf8.pickle'
 	data = []
 	if os.path.exists(filename):
@@ -64,7 +69,7 @@ def main():
 	tokenizer.fit_on_texts(en_texts)
 	x_train = tokenizer.texts_to_sequences(en_texts)
 	x_train = np.array(x_train)
-	# 出力データの整形
+	# 出力データの整形。この整形がたぶん間違ってる
 	y_train = to_train(ja_texts)
 	# モデル作成
 	model = Sequential()
