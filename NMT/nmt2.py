@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 
+__author__ = "@zurustar"
+__status__ = "development"
+__version__ = "0.0.0"
+__date__ = "June 24, 2018"
+
 import os
 import numpy as np
 import pickle
@@ -15,9 +20,11 @@ from keras.layers import Dense
 MAX_SEQUENCE_LENGTH = 1000
 
 def _load(filename):
-	# 各行が' ||| 'で区切られた翻訳元の英語と翻訳後の日本語の
-	# 対になっているので、分割して英語のリストと日本語のリストにする。
-	# そのあとの処理の都合で、日本語には文節？ごとに半角スペースを挿入
+	"""	
+	各行が' ||| 'で区切られた翻訳元の英語と翻訳後の日本語の
+	対になっているので、分割して英語のリストと日本語のリストにする。
+	そのあとの処理の都合で、日本語には文節？ごとに半角スペースを挿入
+	"""	
 	t = janome_tokenizer()
 	ja_texts, en_texts = [], []
 	lines = open(filename).read().split('\n')
@@ -34,8 +41,10 @@ def _load(filename):
 	return [en_texts, ja_texts]
 
 def load():
-	# pickleファイルがあったらそこから読み込む。
-	# なかったら元のテキストファイルを読み込んでpickleファイルに保存しておく。
+	"""
+	pickleファイルがあったらそこから読み込む。
+	なかったら元のテキストファイルを読み込んでpickleファイルに保存しておく。
+	"""
 	filename = './para.utf8.pickle'
 	data = []
 	if os.path.exists(filename):
@@ -50,6 +59,9 @@ def load():
 	return data[0], data[1] # en, ja
 
 def to_train(texts):
+	"""
+	学習用データへの変換
+	"""
 	tokenizer = Tokenizer()
 	tokenizer.fit_on_texts(texts)
 	seqs = tokenizer.texts_to_sequences(texts)
