@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 
+# =============================================================================
 __author__ = "@zurustar"
 __status__ = "development"
 __version__ = "0.0.0"
 __date__ = "June 24, 2018"
 
+# =============================================================================
 import os
 import numpy as np
 import pickle
@@ -17,14 +19,17 @@ from keras.layers.embeddings import Embedding
 from keras.layers import LSTM
 from keras.layers import Dense
 
+# =============================================================================
 MAX_SEQUENCE_LENGTH = 1000
 
+# =============================================================================
 def _load(filename):
 	"""	
 	各行が' ||| 'で区切られた翻訳元の英語と翻訳後の日本語の
 	対になっているので、分割して英語のリストと日本語のリストにする。
 	そのあとの処理の都合で、日本語には文節？ごとに半角スペースを挿入
 	"""	
+	print("_load(" + filanme + ") ----------")
 	t = janome_tokenizer()
 	ja_texts, en_texts = [], []
 	lines = open(filename).read().split('\n')
@@ -40,11 +45,13 @@ def _load(filename):
 		print(len(en_texts), "/", len(lines))
 	return [en_texts, ja_texts]
 
+# =============================================================================
 def load():
 	"""
 	pickleファイルがあったらそこから読み込む。
 	なかったら元のテキストファイルを読み込んでpickleファイルに保存しておく。
 	"""
+	print("load() ----------")
 	filename = './para.utf8.pickle'
 	data = []
 	if os.path.exists(filename):
@@ -58,10 +65,26 @@ def load():
 		fp.close()
 	return data[0], data[1] # en, ja
 
-def to_train(texts):
+# =============================================================================
+def to_x_train(texts):
 	"""
-	学習用データへの変換
+	学習用入力データへの変換
 	"""
+	print("to_x_train(...) ----------")
+	tokenizer = Tokenizer()
+	tokenizer.fit_on_texts(texts)
+	result = tokenizer.texts_to_sequences(texts)
+	result = np.array(result)
+	print("X shape", result.shape)
+	print("X", result)
+	return np.array(result)
+
+# =============================================================================
+def to_y_train(texts):
+	"""
+	学習用出力データへの変換
+	"""
+	print("to_y_train(...) ----------")
 	tokenizer = Tokenizer()
 	tokenizer.fit_on_texts(texts)
 	seqs = tokenizer.texts_to_sequences(texts)
@@ -70,19 +93,16 @@ def to_train(texts):
 		if maxlen < len(seq):
 			maxlen = len(seq)
 	train = pad_sequences(seqs, maxlen=maxlen + 1)
-	print(train.shape, train)
+	print("Y shape", train.shape)
+	print("Y", train)
 	return train
 
+# =============================================================================
 def main():
-	# 読み込み
 	en_texts, ja_texts = load()
-	# 入力データの整形
-	tokenizer = Tokenizer()
-	tokenizer.fit_on_texts(en_texts)
-	x_train = tokenizer.texts_to_sequences(en_texts)
-	x_train = np.array(x_train)
-	# 出力データの整形。この整形がたぶん間違ってる
-	y_train = to_train(ja_texts)
+	x_train = to_x_train(en_texts)
+	y_train = to_y_train(ja_texts)
+
 	# モデル作成
 	model = Sequential()
 	model.add(Embedding(2, 64))
@@ -94,6 +114,7 @@ def main():
 	# 学習
 	history = model.fit(x_train, y_train)
 
+# =============================================================================
 if __name__ == '__main__':
 	main()
 
