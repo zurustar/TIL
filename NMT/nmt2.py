@@ -92,7 +92,7 @@ def to_y_train(texts):
 	for seq in seqs:
 		if maxlen < len(seq):
 			maxlen = len(seq)
-	train = pad_sequences(seqs, maxlen=maxlen + 1)
+	train = pad_sequences(seqs, maxlen=maxlen + 1).T
 	print("Y shape", train.shape)
 	print("Y", train)
 	return train
@@ -105,9 +105,13 @@ def main():
 
 	# モデル作成
 	model = Sequential()
+	#　固定次元の密ベクトルへの変換
 	model.add(Embedding(2, 64))
+	# Long Short Term Memory Layer
 	model.add(LSTM(512, return_sequences=True))
+	# Long Short Term Memory Layer
 	model.add(LSTM(512))
+ 	# 全結合レイヤー、数値はアウトプット数
 	model.add(Dense(2655))
 	model.summary()
 	model.compile(optimizer='rmsprop', loss='sparse_categorical_crossentropy')
