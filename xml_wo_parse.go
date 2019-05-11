@@ -20,11 +20,31 @@ type RSS struct {
 	Channel Channel `xml:"channel"`
 }
 
+func (item *Item) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	raw := struct {
+		Title   string `xml:"title"`
+		PubDate string `xml:"pubDate"`
+	}{}
+	if err := d.DecodeElement(&raw, &start); err != nil {
+		return err
+	}
+	t, err := time.Parse(time.RFC1123Z, raw.PubDate)
+	if err != nil {
+		return err
+	}
+	*item = Item{
+		raw.Title,
+		t,
+	}
+	return nil
+}
+
 func (p *RSS) String() string {
 	s := ``
 	s += `channel > title > ` + p.Channel.Title + "\n"
 	for _, v := range p.Channel.Items {
-		s += `channel > items > ` + v.Title + "\n"
+		s += `channel > items > title > ` + v.Title + "\n"
+		s += `channel > items > time > ` + v.PubDate.Format(time.RFC822) + "\n"
 	}
 	return s
 }
