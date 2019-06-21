@@ -18,3 +18,13 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+
+
+CentOS
+
+install PostgreSQL
+
+prepare dummy data
+
+see https://dev.classmethod.jp/etc/postgresql-create-sample-database/
