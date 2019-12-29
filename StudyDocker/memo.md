@@ -32,9 +32,18 @@ Docker Image: クラスみたいなもん
 Docker Container: インスタンスみたいなもん
 
 
+# インストール
+
+公式サイトに書いてある手順に沿うだけ。ひっかかるようなところはあまりなさそう。
+
+
 # Dockerfile
 
 FROM ... どのイメージをベースにするか？
+
+RUN ... イメージの作成中にコマンドを実行
+
+CP ... ホスト上のファイルをコンテナの中にコピーする
 
 ENTRYPOINT ... コンテナ起動時に（基本的に）実行するコマンドをかく
 
@@ -43,14 +52,33 @@ CMD ... コンテナ起動時にデフォルトで実行するコマンドをか
 
 # CLI 
 
+## docker image build
 
-## docker container run 
+-t ビルドするイメージに付与するタグを指定する
+
+## docker image pull 〜 レジストリからイメージをダウンロード
+
+
+## docker image ls 〜 ホスト上のイメージ一覧取得
+
+
+## docker search 〜 リポジトリ上のイメージを検索
+
+
+## docker container run 〜 コンテナ起動
 
 -d バックグラウンド起動
 
 -p xxx:yyy  ホストのどのポートでコンテナのどのポートを公開するか？
 
+## docker container exec 〜 実行中コンテナでコマンド実行
+
+
 # docker compose
+
+複数のコンテナを動かす。YAML形式の設定ファイルを作る。
+
+Linux環境においてはdockerを入れただけでは入らず、別途インストールする必要があった。
 
 
 # docker swarm
