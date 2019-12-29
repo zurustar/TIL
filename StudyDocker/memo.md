@@ -52,26 +52,30 @@ CMD ... コンテナ起動時にデフォルトで実行するコマンドをか
 
 # CLI 
 
-## docker image build
+## docker image
+
+### docker image build
 
 -t ビルドするイメージに付与するタグを指定する
 
-## docker image pull 〜 レジストリからイメージをダウンロード
+### docker image pull 〜 レジストリからイメージをダウンロード
 
 
-## docker image ls 〜 ホスト上のイメージ一覧取得
+### docker image ls 〜 ホスト上のイメージ一覧取得
 
 
 ## docker search 〜 リポジトリ上のイメージを検索
 
 
-## docker container run 〜 コンテナ起動
+## docker container
+
+### docker container run 〜 コンテナ起動
 
 -d バックグラウンド起動
 
 -p xxx:yyy  ホストのどのポートでコンテナのどのポートを公開するか？
 
-## docker container exec 〜 実行中コンテナでコマンド実行
+### docker container exec 〜 実行中コンテナでコマンド実行
 
 
 # docker compose
