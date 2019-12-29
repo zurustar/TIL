@@ -27,25 +27,36 @@ KVMはカーネルは共用していた気がするけれど、まぁいいや
 
 # Docker用語
 
-
 Docker Image: クラスみたいなもん
+
 Docker Container: インスタンスみたいなもん
 
 
 # Dockerfile
 
+FROM ... どのイメージをベースにするか？
 
 ENTRYPOINT ... コンテナ起動時に（基本的に）実行するコマンドをかく
+
 CMD ... コンテナ起動時にデフォルトで実行するコマンドをかく
 
 
-# CLI
+# CLI 
+
 
 ## docker container run 
 
 -d バックグラウンド起動
 
 -p xxx:yyy  ホストのどのポートでコンテナのどのポートを公開するか？
+
+# docker compose
+
+
+# docker swarm
+
+
+# kubernetes
 
 
 
