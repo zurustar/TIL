@@ -27,9 +27,13 @@ KVMはカーネルは共用していた気がするけれど、まぁいいや
 
 # Docker用語
 
-Docker Image: クラスみたいなもん
+リポジトリ
 
-Docker Container: インスタンスみたいなもん
+レジストリ
+
+Docker Image ... クラスみたいなもん
+
+Docker Container ... インスタンスみたいなもん
 
 
 # インストール
@@ -52,7 +56,12 @@ CMD ... コンテナ起動時にデフォルトで実行するコマンドをか
 
 # CLI 
 
+## docker search 〜 リポジトリ上のイメージを検索
+
+
 ## docker image
+
+イメージを操作するコマンドたち
 
 ### docker image build
 
@@ -64,10 +73,10 @@ CMD ... コンテナ起動時にデフォルトで実行するコマンドをか
 ### docker image ls 〜 ホスト上のイメージ一覧取得
 
 
-## docker search 〜 リポジトリ上のイメージを検索
-
 
 ## docker container
+
+コンテナを操作するコマンドたち
 
 ### docker container run 〜 コンテナ起動
 
@@ -77,6 +86,15 @@ CMD ... コンテナ起動時にデフォルトで実行するコマンドをか
 
 ### docker container exec 〜 実行中コンテナでコマンド実行
 
+-i
+
+-t
+
+### docker container ps 〜 コンテナ一覧の表示
+
+オプションを指定しない場合は実行中のコンテナだけを表示する
+
+### docker container rm 〜コンテナの削除
 
 # docker compose
 
