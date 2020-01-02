@@ -88,7 +88,7 @@ https://hub.docker.com/_/hello-world
     - <ホスト側ディレクトリ>:<コンテナ側マウントポイント>:<オプション>
         - ディレクトリは絶対パスで指定する
 - --link
-    　- deprecated? いずれ廃止されるらしい
+    　- deprecated?
 
 ### docker container exec 〜 実行中コンテナでコマンド実行
 
@@ -108,6 +108,21 @@ https://hub.docker.com/_/hello-world
 複数のコンテナを動かす。YAML形式の設定ファイルを作る。
 
 Linux環境においてはdockerを入れただけでは入らず、別途インストールする必要があった。
+
+version: "3"
+services:
+  xxx:
+    build: .    <- 指定したディレクトリでDocker image buildする感じ
+    ports:
+      - 8080:80
+    volumes:
+    links:
+      yyy
+  yyy:
+    image: iii
+volumes:
+
+
 
 
 # docker swarm
