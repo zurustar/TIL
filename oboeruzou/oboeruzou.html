@@ -1,0 +1,308 @@
+﻿<!Doctype HTML>
+<html>
+<head>
+
+<meta charset="UTF-8">
+
+<title>OBOERUZOU</title>
+
+<script>
+
+
+var questions = [];
+var qid = 0;
+var mode = 0;
+
+function Question(q, a) {
+  this.q = q;
+  this.a = a;
+
+  this.dashita = 0; // 問題を出した回数
+  this.atteta = 0;  // あってた回数
+
+  this.correct = function() {
+    this.atteta += 1;
+    this.dashita += 1;
+  }
+
+  this.wrong = function() {
+    this.dashita += 1;
+  }
+
+  this.ritu = function() {
+    if(this.dashita == 0) {
+      return 0.0;
+    }
+    return this.atteta / this.dashita;
+  }
+}
+
+function on_keyup(evt) {
+  if(mode == 1) {
+    if(evt.keyCode == 32) {  // スペースキー
+      show_answer();
+    }
+  } else if(mode == 2) {
+    if([49,50,51,52,
+        81,87,69,82,
+        65,83,68,70].indexOf(evt.keyCode) >= 0) { //1,2,3,4,Q,W,E,R,A,S,D,F
+      on_correct();
+    }else if([55,56,57,58,
+              85,73,79,80,
+              74,75,76].indexOf(evt.keyCode) >= 0) { // 7,8,9,0,U,I,O,P,H,J,K,L
+      on_wrong();
+    }
+  }
+}
+
+function select_question() {
+  var margin = 0.05; // 全問正解してもたまには出てくるようにする
+  var total = 0.0;
+  for(var i = 0; i<questions.length; i++) {
+    total += (100.0 - questions[i].ritu()) + margin;
+  }
+  var target = total * Math.random();
+  var total = 0.0;
+  for(var i = 0; i<questions.length; i++) {
+    total += (100.0 - questions[i].ritu()) + margin;
+    if(total > target) {
+      return i;
+    }
+  }
+  return 0;
+}
+
+function next_question() {
+  document.getElementById("result").style.display = "";
+  document.getElementById("aarea").style.display = "none";
+  document.getElementById("droparea").style.display = "none";
+  qid = select_question();
+  document.getElementById("q").innerHTML = questions[qid].q;
+  document.getElementById("qinfo").innerHTML
+      = "正答率:" + (questions[qid].ritu() * 100) + "%";
+  document.getElementById("a").innerHTML = questions[qid].a;
+  document.getElementById("qarea").style.display = "";
+  document.getElementById("q").style.display = "";
+  document.getElementById("show_answer_btn").disabled = false;
+  mode = 1;
+}
+
+function show_answer() {
+  mode = 0;
+  document.getElementById("aarea").style.display = "";
+  document.getElementById("show_answer_btn").disabled = true;
+  mode = 2;
+}
+
+function on_correct() {
+  mode = 0;
+  questions[qid].correct();
+  next_question();
+}
+
+function on_wrong() {
+  mode = 0;
+  questions[qid].wrong();
+  next_question();
+}
+
+
+function get_result_message() {
+  var ritu = 0.0;
+  for(var i=0; i<questions.length; i++) {
+    ritu += questions[i].ritu();
+  }
+  ritu /= (questions.length + 0.0);
+  if(ritu >= 0.95) {
+    return "たいへんよくできました。";
+  } else if(ritu >= 0.85) {
+    return "よくできました。";
+  } else if(ritu < 0.1) {
+    return "まずいでしょ。";
+  } else if(ritu < 0.5) {
+    return "がんばりましょう。";
+  }
+  return "おつかれさまでした。";
+}
+
+function show_result() {
+  mode = 0;
+  document.getElementById("qarea").style.display = "none";
+  document.getElementById("aarea").style.display = "none";
+  document.getElementById("droparea").style.display = "none";
+  s = "<table border=1 align=center><tr><th>問題</th><th>回答</th>"
+    + "<th>出題数</th><th>正答数</th><th>正答率[%]</th></tr>";
+  for(var i=0; i<questions.length;i++) {
+    s += "<tr><td>" + questions[i].q + "</td>"
+       + "<td>" + questions[i].a + "</td>"
+       + "<td>" + questions[i].dashita + "</td>"
+       + "<td>" + questions[i].atteta + "</td>"
+       + "<td>" + (questions[i].ritu() * 100.0) + "</td></tr>";
+  }
+  s += "</table>";
+  s += "<p>" + get_result_message() + "</p>";
+  document.getElementById("result").innerHTML = s;
+}
+
+function load_file(files_to_load, num) {
+  // ロード処理が非同期で一気にロードすると格納先変数のデータが
+  // 壊れる可能性が高いのでひとつずつロードするよう再帰的に処理する
+  var reader = new FileReader();
+  reader.addEventListener('onloadstart', function(ev) { console.log(ev); });
+  reader.addEventListener('onprogress',  function(ev) { console.log(ev); });
+  reader.addEventListener('error',       function(ev) { console.log(ev); });
+  reader.addEventListener('load',        function(ev) {
+    // 読んだデータを一行ずつに分割
+    lines = reader.result.split(/\r\n|\r|\n/);
+    // それぞれの行について、前半が問題、後半が答えでそれらがひとつ以上の
+    // 空白文字でくぎられているものと想定
+    for(var i = 0; i<lines.length; i++) {
+      var tmp = lines[i].split(/\s+/);
+      if(tmp.length >= 2) {
+        // 正しいフォーマットだったらインスタンス生成して保存
+        questions.push(new Question(tmp[0], tmp[1]));
+      }
+    }
+    num += 1;
+    if(num < files_to_load.length) {
+      // まだ解析していないファイルがあったら再帰的にロードする
+      load_file(files_to_load, num);
+    } else {
+      next_question();
+    }
+  });
+  reader.readAsText(files_to_load[num]);
+}
+
+function handleFileSelect(evt) {
+  console.log("START function handleFileSelect(evt);");
+  evt.stopPropagation();
+  evt.preventDefault();
+  // 問題データ格納変数をクリアしてからいっこめのファイルの読み込み開始
+  questions = [];
+  load_file(evt.dataTransfer.files, 0);
+}
+
+function handleDragOver(evt) {
+  evt.stopPropagation();
+  evt.preventDefault();
+  evt.dataTransfer.dropEffect = 'copy';
+}
+
+window.onload = function(){
+  document.onkeyup = on_keyup;
+  if(window.File && window.FileReader && window.FileList && window.Blob) {
+    var target = document.getElementById("droparea");
+    target.addEventListener('dragover', handleDragOver, false);
+    target.addEventListener('drop', handleFileSelect, false);
+    var target2 = document.getElementById("dropareatext");
+    target2.addEventListener('dragover', handleDragOver, false);
+    target2.addEventListener('drop', handleFileSelect, false);
+  } else {
+    alert("HTML5に対応しているブラウザをご利用ください");
+  }
+}
+
+</script>
+
+<style>
+  html,body {
+    margin: 0px;
+    padding: 0px;
+    height: 100%;
+    font-family: "ＭＳ 明朝", "Meiryo", "Sans-Serif";
+    text-align: center;
+  }
+
+
+  #droparea {
+    width: 80%;
+    height: 60%;
+    position: relative;
+    margin: 0 auto;
+    text-align: center;
+    background-color: #f6f6ff;
+    border: 2px #999999 solid;
+    border-radius: 10px;
+  }
+
+  #dropareatext {
+    position: absolute;
+    top: 50%;
+    left:50%;
+    width: 100%;
+    margin: -2em 0 0 -50%;
+    font-size: 130%;
+  }
+
+  #qtitle {
+    font-size: 200%;
+  }
+
+  #q {
+    font-size: 400%;
+  }
+
+  #a {
+    font-size: 400%;
+  }
+
+  #atitle {
+    font-size: 180%;
+  }
+
+  button {
+    font-size: 180%;
+    font-family: "ＭＳ 明朝", "Meiryo", "Sans-Serif";
+  }
+
+  #result_btn {
+    font-size: 80%;
+    font-family: "ＭＳ 明朝", "Meiryo", "Sans-Serif";
+  }
+</style>
+
+</head>
+
+<body>
+
+  <DIV id="title" style="padding: 15px; font-size: 240%;">OBOERUZOU</DIV>
+
+
+  <div id="droparea">
+    <div id="dropareatext">
+      ここに問題ファイルをドロップしてください</br> </br>
+      UTF-8形式、1行1問、各行に問題と正解をタブ区切りで記載
+    </div>
+  </div>
+
+  <div id="qarea" style="display: none;">
+    <p>
+      <hr />
+      <div id="qtitle">問題</div> <br/>
+      <div id="q"></div> <br/>
+      <div id="qinfo"></div> <br/>
+      <button id="show_answer_btn" onClick="show_answer();">回答を確認</button>
+    </p>
+  </div>
+
+  <div id="aarea" style="display: none;">
+    <p>
+      <hr />
+      <div id="atitle">回答</div> <br/>
+      <div id="a"></div> <br/>
+      <button id="correct_btn" onClick="on_correct();">○ あっていた</button>　
+      <button id="wrong_btn" onClick="on_wrong();">× まちがえた</button>
+    </p>
+  </div>
+
+  <div id="result" style="display: none;">
+    <p>
+      <hr />
+      <button id="result_btn" onClick="show_result();">結果発表</button>
+    </p>
+  </div>
+    
+
+</body>
+</html>
